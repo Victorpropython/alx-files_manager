@@ -12,7 +12,7 @@ export default class AuthController {
 
     // Get authorization and decode into 'utf-8
     const encodedCredentials = req.headers.authorization.split(' ')[1];
-    const decodedCredentials = Buffer.from(encodedCredentials, 'base64').toString('utf-8');
+    const decodedCredentials = Buffer.from(encodedCredentials, 'Base64').toString('utf-8');
     const [email, password] = decodedCredentials.split(':');
 
     // Hash the password using SHA1
