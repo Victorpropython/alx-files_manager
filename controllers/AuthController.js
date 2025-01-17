@@ -10,9 +10,10 @@ export default class AuthController {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+
     // Get authorization and decode into 'utf-8
     const encodedCredentials = req.headers.authorization.split(' ')[1];
-    const decodedCredentials = Buffer.from(encodedCredentials, 'Base64').toString('utf-8');
+    const decodedCredentials = Buffer.from(encodedCredentials, 'base64').toString('utf-8');
     const [email, password] = decodedCredentials.split(':');
 
     // Hash the password using SHA1
@@ -46,7 +47,15 @@ export default class AuthController {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    await redisClient.del(`auth_${token}`);
+    const rediskey = `auth_${token}`;
+    const tokenExists = await redisClient.get(rediskey);
+
+    if (!tokenExists) {
+      return res.status(401).json({ error: 'Unauthorised' });
+    }
+
+
+    await redisClient.del(rediskey);
     return res.status(204).send();
   }
 
