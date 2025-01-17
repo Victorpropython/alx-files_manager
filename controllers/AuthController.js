@@ -42,25 +42,29 @@ export default class AuthController {
     }
   }
 
-  static async getDisconect(req, res) {
+  static async getDisconnect(req, res) {
     const token = req.headers['x-token'];
-    console.log('Recieved token:', token);
     if (!token) {
-      console.log('No token provided');
-      return res.status(401).json({ error: 'Unauthorized' });
+      res.status(401).json({ error: 'Unauthorized' });
+      res.end();
+      return;
     }
-
-    const redisKey = `auth_${token}`;
-    console.log("Redis key:", redisKey);
-
-    const result = await redisClient.del(redisKey);
-
-    if (result === 0) {
-      return res.status(401).json({ error: 'Unauthorized' });
+    const id = await redisClient.get(`auth_${token}`);
+    if (!id) {
+      res.status(401).json({ error: 'Unauthorized' });
+      res.end();
+      return;
     }
-
-    return res.status(204).send();
+    const user = await dbClient.getUserById(id);
+    if (!user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      res.end();
+      return;
+    }
+    await redisClient.del(`auth_${token}`);
+    res.status(204).end();
   }
+
 
   static async getMe(req, res) {
     const token = req.headers['x-token'];
