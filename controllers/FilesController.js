@@ -38,6 +38,14 @@ export default class FilesController {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
+    if (type === 'file' && !data) {
+      return res.status(400).json({ error: 'Missing data' });
+    }
+
+    if (parentId) {
+      newFile.parentId = ObjectId(parentId);
+    }
+
     // Retrieve user based on token
     const userId = await redisClient.get(`auth_${token}`);
     if (!userId) {
